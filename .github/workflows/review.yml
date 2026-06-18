@@ -1,0 +1,25 @@
+name: nominal-code-review
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/gauthierdmn/nominal-code-openai:4b92d625bdb3e370b2baa1336188169e6e05685f
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        AGENT_PROVIDER: openai
+        AGENT_MODEL: gpt-4.1-nano
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cd /app && uv run nominal-code ci github
